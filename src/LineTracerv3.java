@@ -8,7 +8,7 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 import lejos.robotics.RegulatedMotor;
 
-public class LineTracerv2 {
+public class LineTracerv3 {
 
 	public static void main(String[] args) {
 		RegulatedMotor leftMotor = Motor.A;
@@ -17,7 +17,7 @@ public class LineTracerv2 {
 		EV3 ev3 = (EV3) BrickFinder.getLocal();
 		TextLCD lcd = ev3.getTextLCD();
 		
-		int SPEED = 100;
+		int SPEED = 150;
 		int DELAY = 50;
 		float LOWER = 0.15f;
 		float UPPER = 0.55f;
@@ -50,13 +50,12 @@ public class LineTracerv2 {
 				rightMotor.backward();
 			}
 			else if (redSample[0] < UPPER) { 
-				leftMotor.backward();
-				rightMotor.stop();
-				
-			}
-			else if (redSample[0] > UPPER) { 
 				leftMotor.stop();
 				rightMotor.backward();
+			}
+			else if (redSample[0] > UPPER) { 
+				leftMotor.backward();
+				rightMotor.stop();
 			}
 			
 			// Allow for some time before self-correcting
