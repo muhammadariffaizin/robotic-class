@@ -1,9 +1,13 @@
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import astar.*;
 
@@ -41,110 +45,24 @@ import astar.*;
  *              Generate ascii maps from this Web site: https://www.dcode.fr/maze-generator
  */
 public class AStarDriver {
+	GridMap gridMap = null;
 
-    public static void main(String[] args) {
+    public AStarDriver() {
+    	Scanner scan = new Scanner(System.in);
+    	
+        String fileName;
         
-        Scanner scan = new Scanner(System.in);
-
-        System.out.println("1. Manually Create Grid\n" +
-        "2. Load from file");
-        int option = scan.nextInt();
-
-        // Create grid and display in ascii charactors
-        GridMap gridMap = null;
-
-        switch (option) {
-
-        case 1:// manual create grid
-
-            // Get user input for grid size
-            System.out.println("Enter number of Grid Map Columns");
-            int cols = scan.nextInt();
-
-            System.out.println("Enter number of Grid Map Rows");
-            int rows = scan.nextInt();
-
-            System.out.println("You entered " + cols + " cols and " + rows + " rows");
-            gridMap = manualGrid(rows, cols);
-            break;
-
-        case 2:// load from file
-
-            System.out.println("Enter file name or press enter to accept the default (maze.txt)");
-            scan.nextLine();//consume any junk chars
-            String fileName = scan.nextLine();
-            if (fileName.isEmpty()) {
-                fileName = "maze.txt";
-            }
-            gridMap = gridFromFile(fileName, gridMap);
-            break;
-        default:
-            // TODO
-            break;
-        }
-
-        displayGrid(gridMap);
-
-        boolean repeat = true;
-        while (repeat) {
-            // get user input to add obstacle to grid
-            System.out.println("Cell row");
-            int row = scan.nextInt();
-
-            System.out.println("Cell col");
-            int col = scan.nextInt();
-
-            System.out.println("Type of cell:\n" + "1. Start Cell\n" + "2. Easy Cell\n" + "3. Normal Cell\n"
-                    + "4. Tough Cell\n" + "5. Very Tough Cell\n" + "6. Block Cell\n" + "7. Finish Cell");
-
-            int cellType = scan.nextInt();
-            switch (cellType) {
-
-            case 1:
-                gridMap.setGridCell(row, col, GridMap.NORMAL, GridMap.START_CELL);
-                break;
-
-            case 2:
-                gridMap.setGridCell(row, col, GridMap.EASY, GridMap.NORMAL_CELL);
-                break;
-
-            case 3:
-                gridMap.setGridCell(row, col, GridMap.NORMAL, GridMap.NORMAL_CELL);
-                break;
-
-            case 4:
-                gridMap.setGridCell(row, col, GridMap.TOUGH, GridMap.NORMAL_CELL);
-                break;
-
-            case 5:
-                gridMap.setGridCell(row, col, GridMap.VERY_TOUGH, GridMap.NORMAL_CELL);
-                break;
-
-            case 6:
-                gridMap.setGridCell(row, col, GridMap.BLOCK, GridMap.NORMAL_CELL);
-                break;
-
-            case 7:
-                gridMap.setGridCell(row, col, GridMap.NORMAL, GridMap.FINISH_CELL);
-                break;
-
-            default:
-                break;
-            }
-            displayGrid(gridMap);
-
-            System.out.println("Add another cell? y or n");
-            String input = scan.next();
-            if (input.equalsIgnoreCase("n")) {
-                repeat = false;
-            }
-        }//end while loop
+        fileName = "maze.txt";
+        
+        gridMap = gridFromFile(fileName);
+        
+        displayGrid();
 
         //Calculate A* path
-        calcAStar(gridMap);
+        calcAStar();
             
         //plot path on display grid
-        displayGrid(gridMap);
+        displayGrid();
     }
 
     /**
@@ -152,9 +70,10 @@ public class AStarDriver {
      * @param gridMap
      * @return Map containing path waypoints.
      */
-    private static GridMap calcAStar(GridMap gridMap) {
+    private GridMap calcAStar() {
 
         AStar aStar = new AStar();//shortest path algorithm class
+//        System.out.println(gridMap);
         GridCell[] pathWaypoints = aStar.findPath(gridMap);
 
         if(pathWaypoints == null ){//no path found        		
@@ -180,7 +99,7 @@ public class AStarDriver {
     /**
      * Load A* grid from file.
      */
-    private static GridMap gridFromFile(String fileName, GridMap gridMap) {
+    private GridMap gridFromFile(String fileName) {
 
         long cols = 0;
         long rows = 0;
@@ -188,7 +107,7 @@ public class AStarDriver {
         //Calculate size of grid to make.
         Path path = Paths.get(fileName);
         try {
-            rows = Files.lines(path).count();
+            rows = Files.readAllLines(path, StandardCharsets.UTF_8).size();
             long fileSize = Files.size(path);
             cols = (long) Math.ceil((((double) fileSize / rows) / 1.866));
             gridMap = new GridMap((int)rows, (int)cols);//new Map((int)cols, (int)rows); //
@@ -232,14 +151,9 @@ public class AStarDriver {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        gridMap.setGridCell(0,2, GridMap.BLOCK, GridMap.START_CELL);
+        gridMap.setGridCell(6,2, GridMap.BLOCK, GridMap.FINISH_CELL);
         return gridMap;
-    }
-
-    /**
-     * Manually create A* grid.
-     */
-    private static GridMap manualGrid(int rows, int cols) {
-        return new GridMap(rows, cols);// grid cell map object
     }
 
     /**
@@ -251,12 +165,14 @@ public class AStarDriver {
      * 
      * @param gridMap
      */
-    private static void displayGrid(GridMap gridMap) {
+    private void displayGrid() {
 
         GridCell[][] grid = gridMap.gridCellMap;
 
         //Column number formating code
+        System.out.println(grid[0].length);
         System.out.print(" ");
+  
         for(int col = 0; col < grid[0].length; col++){
             System.out.printf("%d", col%10);//
         }
@@ -266,13 +182,13 @@ public class AStarDriver {
             System.out.printf("%d", row%10);//grid row number
             for (int col = 0; col < grid[row].length; col++) {
                 if (grid[row][col].isStart) {
-                    System.out.printf("%c", 0x26AA);// medium white circle 
+                    System.out.printf("%c", 'S');// medium white circle 
                 }else if (grid[row][col].isFinish) {
-                    System.out.printf("%c", 0x26AB);// medium black circle 
+                    System.out.printf("%c", '$');// medium black circle 
                 }else if (grid[row][col].cost == GridMap.NORMAL) {
                     System.out.printf("%c", ' ');// empty space
                 } else if (grid[row][col].cost == GridMap.BLOCK) {
-                    System.out.printf("%c", 0x2588);// solid box
+                    System.out.printf("%c", 'X');// solid box
                 } else if (grid[row][col].cost == GridMap.VERY_TOUGH) {
                     System.out.printf("%c", 0x2592);// medium shade
                 } else if (grid[row][col].cost == GridMap.TOUGH) {
@@ -287,5 +203,54 @@ public class AStarDriver {
             }
             System.out.println();// newline
         }
+    }
+    
+    public List<Integer> getMove() {
+    	List<Integer> move = new ArrayList<>();
+    	int startX = 0, startY = 0;
+    	int X, Y;
+    	GridCell[][] grid = gridMap.gridCellMap;
+    	
+    	for (int row = 0; row < grid.length; row++) {
+            System.out.printf("%d", row%10);//grid row number
+            for (int col = 0; col < grid[row].length; col++) {
+            	if (grid[row][col].isStart) {
+                    startX = col;
+                    startY = row;
+                }
+            }
+        }
+    	
+    	X = startX;
+    	Y = startY;
+    	
+    	// 0 Forward
+    	// 1 Left
+    	// 2 Right
+    	while(true) {
+    		System.out.printf("%d %d\n", X, Y);
+    		gridMap.setGridCell(Y,X, GridMap.BLOCK, GridMap.NORMAL_CELL);
+    		if(grid[Y][X].isFinish) {
+    			move.add(0);
+    			break;
+    		}
+    		
+    		if(grid[Y+1][X].cost == GridMap.PATH) {
+    			move.add(0);
+    			Y = Y+1;
+    		} else if(grid[Y][X+1].cost == GridMap.PATH) {
+    			move.add(1);
+    			move.add(0);
+    			move.add(2);
+    			X = X+1;
+    		} else if(grid[Y][X-1].cost == GridMap.PATH) {
+    			move.add(2);
+    			move.add(0);
+    			move.add(1);
+    			X = X - 1;
+    		}
+    	}
+    	
+    	return move;
     }
 }

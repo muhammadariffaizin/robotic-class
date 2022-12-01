@@ -84,7 +84,7 @@ public class GridCell {
      */
     public boolean isTotalBlock() {
     	
-    	if (cost == Map.BLOCK){
+    	if (cost == GridMap.BLOCK){
     		return true;
     	}
     	else{

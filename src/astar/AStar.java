@@ -1,6 +1,8 @@
 package astar;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 
@@ -65,11 +67,12 @@ public class AStar {
     public GridCell[] findPath(GridMap gridMap){
 
         GridCell startCell = gridMap.getStartCell();
-        // System.out.println(startCell.position);
+        System.out.println(startCell);
 
         GridCell goal = gridMap.getFinishCell();
+        System.out.println(goal);
 
-        PriorityQueue<GridCell> openSet = new PriorityQueue<GridCell>(new GridCellComparator());
+        PriorityQueue<GridCell> openSet = new PriorityQueue<GridCell>(100, new GridCellComparator());
         openSet.add(startCell);
 
         HashMap<GridCell, Double> gScore = new HashMap<GridCell, Double>(); // cost so far
@@ -95,7 +98,15 @@ public class AStar {
             
             for(GridCell next: neighbors){
                 double tentativeGScore = gScore.get(current) + next.cost;
-                if ((gScore.containsKey(next) == false) || tentativeGScore < gScore.getOrDefault(next, Double.MAX_VALUE)){
+
+                double keyCount;
+                if(gScore.containsKey(next)){
+                    keyCount = gScore.get(next);
+                } else {
+                    keyCount = 0;
+                }
+                
+                if ((gScore.containsKey(next) == false) || tentativeGScore < keyCount){
                     gScore.put(next, tentativeGScore);
                     fScore.put(next, gScore.get(next) + cbDist(next.position, goal.position, 1.0));//calculate huristic (h()) and add to g() to get f()
                     //

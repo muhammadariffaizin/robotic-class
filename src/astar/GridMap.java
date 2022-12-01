@@ -149,9 +149,12 @@ public class GridMap {
 	*/
 	public GridCell getStartCell() {
        //
+//	   System.out.println(gridCellMap.length);
        for(int i = 0; i < gridCellMap.length; i++){
            for(int j = 0; j < gridCellMap[i].length; j++){
                if (gridCellMap[i][j].isStart == true){
+//            	   System.out.println(i);
+//            	   System.out.println(j);
                    return gridCellMap[i][j]; //return the start cell object                    
                }//End If
            }//end inner for loop
