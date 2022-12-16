@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.List;
 
 import lejos.hardware.BrickFinder;
@@ -21,10 +22,13 @@ public class LineMazeSolverv1 {
 	static EV3UltrasonicSensor ultraSensor = 	new EV3UltrasonicSensor(SensorPort.S2);
 	static EV3 ev3 = (EV3) BrickFinder.getLocal();
 	static TextLCD lcd = ev3.getTextLCD();
-	static int SPEED = 150;
+	static int SPEED = 250;
 	static int DELAY = 50;
+	static int TURN_DELAY = 2000;
+	static int FORWARD_DELAY = 1500;
 	static float LOWER = 0.15f;
 	static float UPPER = 0.55f;
+	static int isStop = 0;
 
 	public static void main(String[] args) {
 		// Initialize sampleFetcher
@@ -77,7 +81,12 @@ public class LineMazeSolverv1 {
 				Thread.sleep(DELAY);
 			} catch (InterruptedException e) {}
 			
+
 			if (Button.ESCAPE.isDown()) {
+				isStop = 1;
+			}
+			
+			if (isStop == 1) {
 				break;
 			}
 		}
@@ -112,15 +121,20 @@ public class LineMazeSolverv1 {
 		AStarDriver maze = new AStarDriver();
 		
 		List<Integer> moves = maze.getMove();
-
+		
+		System.out.println(Arrays.toString(moves.toArray()));
 		for (int i = 0; i < moves.size(); i++) {
-		  if(moves.get(i) == 0) {
-			  MazeForward();
-		  } else if(moves.get(i) == 1) {
-			  MazeTurnLeft();
-		  } else if(moves.get(i) == 2) {
-			  MazeTurnRight();
-		  }
+		    if(moves.get(i) == 0) {
+			    MazeForward();
+		    } else if(moves.get(i) == 1) {
+			    MazeTurnLeft();
+		    } else if(moves.get(i) == 2) {
+			    MazeTurnRight();
+		    }
+
+			if (Button.ESCAPE.isDown()) {
+				isStop = 1;
+			}
 		}
 //		if (data > 0.07f) {
 //			leftMotor.backward();
@@ -152,7 +166,7 @@ public class LineMazeSolverv1 {
 		rightMotor.backward();
 
 		try {
-			Thread.sleep(1500);
+			Thread.sleep(FORWARD_DELAY);
 		} catch (InterruptedException e) {}
 		
 		leftMotor.stop();
@@ -163,7 +177,7 @@ public class LineMazeSolverv1 {
 		rightMotor.backward();
 		
 		try {
-			Thread.sleep(500);
+			Thread.sleep(TURN_DELAY);
 		} catch (InterruptedException e) {}
 		
 		rightMotor.stop();
@@ -173,7 +187,7 @@ public class LineMazeSolverv1 {
 		leftMotor.backward();
 		
 		try {  
-			Thread.sleep(500);
+			Thread.sleep(TURN_DELAY);
 		} catch (InterruptedException e) {}
 		
 		leftMotor.stop();

@@ -48,21 +48,15 @@ public class AStarDriver {
 	GridMap gridMap = null;
 
     public AStarDriver() {
-    	Scanner scan = new Scanner(System.in);
-    	
-        String fileName;
+        gridMap = getGrid();
         
-        fileName = "maze.txt";
-        
-        gridMap = gridFromFile(fileName);
-        
-        displayGrid();
+//        displayGrid();
 
         //Calculate A* path
         calcAStar();
             
         //plot path on display grid
-        displayGrid();
+//        displayGrid();
     }
 
     /**
@@ -99,58 +93,33 @@ public class AStarDriver {
     /**
      * Load A* grid from file.
      */
-    private GridMap gridFromFile(String fileName) {
-
-        long cols = 0;
-        long rows = 0;
-        // Read gridmap data from ascii text file
-        //Calculate size of grid to make.
-        Path path = Paths.get(fileName);
-        try {
-            rows = Files.readAllLines(path, StandardCharsets.UTF_8).size();
-            long fileSize = Files.size(path);
-            cols = (long) Math.ceil((((double) fileSize / rows) / 1.866));
-            gridMap = new GridMap((int)rows, (int)cols);//new Map((int)cols, (int)rows); //
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+    private GridMap getGrid() {
+    	int rows = 7;
+    	int cols = 5;
+    	
+    	gridMap = new GridMap((int)rows, (int)cols);
+    	
+        int[][] map = {
+        	{1, 1, 0, 1, 1},
+        	{1, 0, 0, 0, 1},
+        	{1, 1, 1, 0, 1},
+        	{1, 0, 0, 0, 1},
+        	{1, 0, 1, 0, 1},
+        	{1, 0, 0, 1, 1},
+        	{1, 1, 0, 1, 1}
+        };
+        
+        for (int i = 0; i < rows; i++) {
+        	for (int j = 0; j < cols; j++) {
+				int val = map[i][j];
+				if (val == 0) {
+					gridMap.setGridCell(i,j, GridMap.NORMAL, GridMap.NORMAL_CELL);
+				} else if(val == 1) {
+					gridMap.setGridCell(i,j, GridMap.BLOCK, GridMap.NORMAL_CELL);
+				}
+			}
         }
-
-        FileReader io;
-        try {
-            io = new FileReader(fileName);
-            int x = 0;
-            int y = 0;
-
-            while (io.ready()) {
-                int val = io.read();
-
-                if (val == '\n') {// start new row
-                    y++;
-                    x = 0;
-                    if (y > rows - 1) {
-                        y--;
-                    }
-                } else {
-                    if (val == 32) {
-                        gridMap.setGridCell(y,x, GridMap.NORMAL, GridMap.NORMAL_CELL);
-                    } else {
-                        gridMap.setGridCell(y,x, GridMap.BLOCK, GridMap.NORMAL_CELL);
-                    }
-                    x++;
-                    if (x > cols - 1) {
-                        x--;
-                    }
-                }
-            } // end file read loop
-
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+                    
         gridMap.setGridCell(0,2, GridMap.BLOCK, GridMap.START_CELL);
         gridMap.setGridCell(6,2, GridMap.BLOCK, GridMap.FINISH_CELL);
         return gridMap;
@@ -212,7 +181,7 @@ public class AStarDriver {
     	GridCell[][] grid = gridMap.gridCellMap;
     	
     	for (int row = 0; row < grid.length; row++) {
-            System.out.printf("%d", row%10);//grid row number
+//            System.out.printf("%d", row%10);//grid row number
             for (int col = 0; col < grid[row].length; col++) {
             	if (grid[row][col].isStart) {
                     startX = col;
@@ -228,7 +197,7 @@ public class AStarDriver {
     	// 1 Left
     	// 2 Right
     	while(true) {
-    		System.out.printf("%d %d\n", X, Y);
+//    		System.out.printf("%d %d\n", X, Y);
     		gridMap.setGridCell(Y,X, GridMap.BLOCK, GridMap.NORMAL_CELL);
     		if(grid[Y][X].isFinish) {
     			move.add(0);
